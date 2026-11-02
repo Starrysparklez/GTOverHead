@@ -1,0 +1,30 @@
+{
+  "variants": {
+    "facing=down": {
+      "model": "gtoverhead:block/ev_connector"
+    },
+    "facing=up": {
+      "model": "gtoverhead:block/ev_connector",
+      "x": 180
+    },
+    "facing=south": {
+      "model": "gtoverhead:block/ev_connector",
+      "x": 90
+    },
+    "facing=north": {
+      "model": "gtoverhead:block/ev_connector",
+      "x": 90,
+      "y": 180
+    },
+    "facing=east": {
+      "model": "gtoverhead:block/ev_connector",
+      "x": 90,
+      "y": 270
+    },
+    "facing=west": {
+      "model": "gtoverhead:block/ev_connector",
+      "x": 90,
+      "y": 90
+    }
+  }
+}
