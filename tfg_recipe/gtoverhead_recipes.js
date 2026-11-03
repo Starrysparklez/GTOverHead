@@ -88,7 +88,7 @@ ServerEvents.recipes((event) => {
         'PPP',
     ], {
         R: 'gtceu:long_aluminium_rod',
-        G: 'firmalive:reinforced_glass',
+        G: 'firmalife:reinforced_glass',
         P: '#kubejs:rubber_plates',
     });
 
