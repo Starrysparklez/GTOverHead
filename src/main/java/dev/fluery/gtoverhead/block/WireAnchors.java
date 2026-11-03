@@ -14,7 +14,7 @@ import org.jetbrains.annotations.Nullable;
  */
 public final class WireAnchors {
 
-    public static final double RELAY_TIP_HEIGHT = 0.5625;
+    public static final double RELAY_TIP_HEIGHT = 0.8125;
 
     private WireAnchors() {}
 

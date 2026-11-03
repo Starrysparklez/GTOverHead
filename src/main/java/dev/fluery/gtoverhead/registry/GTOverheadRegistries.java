@@ -2,9 +2,11 @@ package dev.fluery.gtoverhead.registry;
 
 import dev.fluery.gtoverhead.GTOverhead;
 import dev.fluery.gtoverhead.block.ConnectorBlock;
+import dev.fluery.gtoverhead.block.GarlandBlock;
 import dev.fluery.gtoverhead.block.RelayConnectorBlock;
 import dev.fluery.gtoverhead.blockentity.ConnectorBlockEntity;
 import dev.fluery.gtoverhead.blockentity.RelayConnectorBlockEntity;
+import dev.fluery.gtoverhead.item.VoltmeterItem;
 import dev.fluery.gtoverhead.item.WireSpoolItem;
 import dev.fluery.gtoverhead.tier.WireTier;
 
@@ -37,6 +39,8 @@ public final class GTOverheadRegistries {
             .create(Registries.CREATIVE_MODE_TAB, GTOverhead.MOD_ID);
 
     public static Supplier<Item> EMPTY_SPOOL = () -> null;
+    public static Supplier<GarlandBlock> GARLAND = () -> null;
+    public static Supplier<VoltmeterItem> VOLTMETER = () -> null;
     public static Supplier<RelayConnectorBlock> RELAY_BLOCK;
 
     public static final RegistryObject<CreativeModeTab> TAB = CREATIVE_MODE_TABS.register("gtoverhead",
@@ -48,10 +52,12 @@ public final class GTOverheadRegistries {
                             output.accept(spool.get());
                         }
                         output.accept(EMPTY_SPOOL.get());
+                        output.accept(VOLTMETER.get());
                         for (var connector : CONNECTOR_BLOCKS) {
                             output.accept(connector.get());
                         }
                         output.accept(RELAY_BLOCK.get());
+                        output.accept(GARLAND.get());
                     })
                     .build());
 
@@ -75,6 +81,8 @@ public final class GTOverheadRegistries {
 
         RELAY_BLOCK = registerRelay(GTOverhead.REGISTRATE);
         registerEmptySpool(GTOverhead.REGISTRATE);
+        registerGarland(GTOverhead.REGISTRATE);
+        registerVoltmeter(GTOverhead.REGISTRATE);
 
         for (WireTier tier : WireTier.values()) {
             var block = registerConnector(GTOverhead.REGISTRATE, tier);
@@ -109,6 +117,19 @@ public final class GTOverheadRegistries {
     private static void registerEmptySpool(GTRegistrate registrate) {
         var item = registrate.item("empty_spool", Item::new).register();
         EMPTY_SPOOL = () -> item.get();
+    }
+
+    private static void registerGarland(GTRegistrate registrate) {
+        var block = registrate.block("insulator_garland", GarlandBlock::new)
+                .initialProperties(() -> Blocks.IRON_BLOCK)
+                .simpleItem()
+                .register();
+        GARLAND = () -> block.get();
+    }
+
+    private static void registerVoltmeter(GTRegistrate registrate) {
+        var item = registrate.item("voltmeter", VoltmeterItem::new).register();
+        VOLTMETER = () -> item.get();
     }
 
     public static String spoolName(WireTier tier) {

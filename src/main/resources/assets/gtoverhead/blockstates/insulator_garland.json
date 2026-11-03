@@ -1,0 +1,30 @@
+{
+  "variants": {
+    "facing=down": {
+      "model": "gtoverhead:block/insulator_garland"
+    },
+    "facing=up": {
+      "model": "gtoverhead:block/insulator_garland",
+      "x": 180
+    },
+    "facing=south": {
+      "model": "gtoverhead:block/insulator_garland",
+      "x": 90
+    },
+    "facing=north": {
+      "model": "gtoverhead:block/insulator_garland",
+      "x": 90,
+      "y": 180
+    },
+    "facing=east": {
+      "model": "gtoverhead:block/insulator_garland",
+      "x": 90,
+      "y": 270
+    },
+    "facing=west": {
+      "model": "gtoverhead:block/insulator_garland",
+      "x": 90,
+      "y": 90
+    }
+  }
+}

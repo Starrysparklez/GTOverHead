@@ -12,8 +12,16 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 
 /**
- * Shocks entities that touch (or, for EV/IV wires, get too close to) a live
- * wire. Damage uses the GregTech electric damage type.
+ * Shocks entities near a live wire, following the "bird on a wire" rule:
+ * <ul>
+ * <li>no path to the ground - the entity is perfectly safe, even when
+ * touching the wire;</li>
+ * <li>grounded entity (touching ground/blocks/water) is shocked by direct
+ * contact with the wire;</li>
+ * <li>Eg and IV wires additionally arc through the air: airborne entities
+ * within the hazard radius get shocked even without contact.</li>
+ * </ul>
+ * Damage uses the GregTech electric damage type.
  */
 public final class ElectrocutionHandler {
 
@@ -39,17 +47,26 @@ public final class ElectrocutionHandler {
         }
         int steps = Math.max(1, (int) Math.ceil(length));
         Vec3 step = delta.scale(1.0 / steps);
+        // direct contact reach while standing on something conductive
+        double contactRadius = Math.min(radius, 0.75);
+        // EV/IV arcs through the air reach airborne entities
+        boolean arcsThroughAir = tier.index >= WireTier.EXTREME.index;
         for (int i = 0; i <= steps; i++) {
             Vec3 point = from.add(step.scale(i));
             AABB box = new AABB(point, point).inflate(radius);
             for (LivingEntity entity : level.getEntitiesOfClass(LivingEntity.class, box,
                     e -> e.isAlive() && e.isAttackable())) {
-                // distance falloff: full damage at the wire, half at the edge
                 Vec3 closest = closestPointOnSegment(from, to, entity.position());
                 double dist = entity.position().distanceTo(closest);
                 if (dist > radius) {
                     continue;
                 }
+                boolean grounded = touchesBlocks(entity);
+                boolean shocked = grounded ? dist <= contactRadius : arcsThroughAir;
+                if (!shocked) {
+                    continue;
+                }
+                // distance falloff: full damage at the wire, half at the edge
                 float scaled = (float) Math.max(1.0F, damage * (1.0 - 0.5 * dist / radius));
                 if (entity.hurt(GTDamageTypes.ELECTRIC.source(level), scaled)) {
                     level.sendParticles(ParticleTypes.ELECTRIC_SPARK, entity.getX(),
@@ -57,6 +74,15 @@ public final class ElectrocutionHandler {
                 }
             }
         }
+    }
+
+    /**
+     * True when the entity has a path to the earth: standing/climbing on
+     * blocks, pressed against them, or swimming.
+     */
+    private static boolean touchesBlocks(LivingEntity entity) {
+        return entity.onGround() || entity.horizontalCollision || entity.verticalCollision ||
+                entity.isInWaterOrBubble();
     }
 
     private static Vec3 closestPointOnSegment(Vec3 a, Vec3 b, Vec3 p) {

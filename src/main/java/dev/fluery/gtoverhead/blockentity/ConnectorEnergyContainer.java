@@ -12,6 +12,13 @@ public class ConnectorEnergyContainer implements IEnergyContainer {
     private final ConnectorBlockEntity connector;
     private long energyStored;
     private long wireOriginEnergy;
+    /**
+     * Voltage the buffered energy last arrived at (GT cable network semantics:
+     * the network carries whatever is fed into it). A connector never re-emits
+     * at a higher voltage than it received - no free transformer-up. The label
+     * follows the latest arrival, so it recovers after network repairs.
+     */
+    private long bufferVoltage;
 
     public ConnectorEnergyContainer(ConnectorBlockEntity connector) {
         this.connector = connector;
@@ -48,12 +55,26 @@ public class ConnectorEnergyContainer implements IEnergyContainer {
         if (canAccept >= voltage) {
             long accepted = Math.min(canAccept / voltage, Math.min(amperage, getInputAmperage()));
             if (accepted > 0) {
+                bufferVoltage = voltage;
                 energyStored += accepted * voltage;
                 connector.setChanged();
                 return accepted;
             }
         }
         return 0;
+    }
+
+    /** Voltage the currently buffered energy arrived at, 0 if the buffer is empty. */
+    public long getBufferVoltage() {
+        return energyStored > 0 ? bufferVoltage : 0;
+    }
+
+    /** Effective output voltage: never higher than what the buffer holds. */
+    public long getEffectiveOutputVoltage() {
+        if (energyStored <= 0 || bufferVoltage <= 0) {
+            return tier().voltage();
+        }
+        return Math.min(tier().voltage(), bufferVoltage);
     }
 
     /**
@@ -111,7 +132,7 @@ public class ConnectorEnergyContainer implements IEnergyContainer {
 
     @Override
     public long getOutputVoltage() {
-        return tier().voltage();
+        return getEffectiveOutputVoltage();
     }
 
     @Override
@@ -126,5 +147,12 @@ public class ConnectorEnergyContainer implements IEnergyContainer {
 
     public void setEnergyStored(long energy) {
         this.energyStored = Math.min(getEnergyCapacity(), Math.max(0, energy));
+        if (this.energyStored <= 0) {
+            this.bufferVoltage = 0;
+        }
+    }
+
+    public void setBufferVoltage(long voltage) {
+        this.bufferVoltage = Math.max(0, voltage);
     }
 }

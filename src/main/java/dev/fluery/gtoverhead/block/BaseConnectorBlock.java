@@ -56,11 +56,11 @@ public abstract class BaseConnectorBlock extends BaseEntityBlock {
 
     @Override
     public VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
-        return PoleShapes.of(shapeBoxes(), state.getValue(FACING));
+        return PoleShapes.of(shapeHeight(), state.getValue(FACING));
     }
 
-    /** Collision boxes of this pole type in the authored (pole pointing up) orientation. */
-    protected abstract double[][] shapeBoxes();
+    /** Model height of this pole (insulator tip above the support face), in blocks. */
+    protected abstract double shapeHeight();
 
     @Override
     public void onRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean movedByPiston) {

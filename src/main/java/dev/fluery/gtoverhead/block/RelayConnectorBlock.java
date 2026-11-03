@@ -25,8 +25,8 @@ public class RelayConnectorBlock extends BaseConnectorBlock {
     }
 
     @Override
-    protected double[][] shapeBoxes() {
-        return PoleShapes.STRUCTURAL_BOXES;
+    protected double shapeHeight() {
+        return WireAnchors.RELAY_TIP_HEIGHT;
     }
 
     @Nullable

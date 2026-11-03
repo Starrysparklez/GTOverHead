@@ -2,6 +2,8 @@ package dev.fluery.gtoverhead.network;
 
 import dev.fluery.gtoverhead.GTOverheadConfig;
 import dev.fluery.gtoverhead.block.BaseConnectorBlock;
+import dev.fluery.gtoverhead.blockentity.ConnectorBlockEntity;
+import dev.fluery.gtoverhead.blockentity.RelayConnectorBlockEntity;
 import dev.fluery.gtoverhead.tier.WireTier;
 
 import net.minecraft.core.BlockPos;
@@ -153,7 +155,7 @@ public class WireNetworkSavedData extends SavedData {
      * voltage drops by each edge's loss, amperage is limited by the weakest
      * wire on the path.
      */
-    public List<Delivery> route(BlockPos start, long startVoltage, int startAmperage) {
+    public List<Delivery> route(ServerLevel level, BlockPos start, long startVoltage, int startAmperage) {
         List<Delivery> deliveries = new ArrayList<>();
         if (startVoltage <= 0 || startAmperage <= 0) {
             return deliveries;
@@ -166,6 +168,11 @@ public class WireNetworkSavedData extends SavedData {
         while (!queue.isEmpty()) {
             Node current = queue.poll();
             for (Edge edge : edgesAt(current.pos())) {
+                // wire voltage rating: a wire fed above its tier melts (spec §3.2.5)
+                if (current.voltage() > edge.tier().voltage()) {
+                    burnEdge(level, edge, current.pos());
+                    continue;
+                }
                 BlockPos other = edge.other(current.pos());
                 if (!visited.add(other.asLong())) {
                     continue;
@@ -184,6 +191,35 @@ public class WireNetworkSavedData extends SavedData {
             }
         }
         return deliveries;
+    }
+
+    /**
+     * A wire fed above its voltage rating burns: the edge is destroyed, the
+     * endpoint poles forget the wire (so it vanishes visually and can be
+     * relinked) and the wire drops as spools at a loaded endpoint.
+     */
+    private void burnEdge(ServerLevel level, Edge edge, BlockPos burnAt) {
+        removeEdge(edge);
+        for (BlockPos endpoint : new BlockPos[] { edge.a(), edge.b() }) {
+            if (!level.isLoaded(endpoint)) {
+                continue;
+            }
+            if (level.getBlockEntity(endpoint) instanceof ConnectorBlockEntity connector) {
+                connector.clearLink(false);
+            } else if (level.getBlockEntity(endpoint) instanceof RelayConnectorBlockEntity relay) {
+                relay.removeLink(edge.other(endpoint), null);
+            }
+        }
+        BlockPos dropAt = level.isLoaded(edge.a()) ? edge.a() : level.isLoaded(edge.b()) ? edge.b() : burnAt;
+        int spools = (int) Math.max(1, Math.floor(edge.distance() / GTOverheadConfig.wireSpoolSegmentLength()));
+        if (spools > 0) {
+            Containers.dropItemStack(level, dropAt.getX() + 0.5, dropAt.getY() + 0.5, dropAt.getZ() + 0.5,
+                    new ItemStack(edge.tier().spool().get(), spools));
+        }
+        level.sendParticles(net.minecraft.core.particles.ParticleTypes.LAVA, dropAt.getX() + 0.5,
+                dropAt.getY() + 1.1, dropAt.getZ() + 0.5, 10, 0.2, 0.2, 0.2, 0.02);
+        level.playSound(null, dropAt, net.minecraft.sounds.SoundEvents.LAVA_EXTINGUISH,
+                net.minecraft.sounds.SoundSource.BLOCKS, 1.0F, 0.7F);
     }
 
     @Nullable

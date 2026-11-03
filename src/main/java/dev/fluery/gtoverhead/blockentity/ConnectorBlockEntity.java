@@ -44,6 +44,7 @@ public class ConnectorBlockEntity extends BlockEntity {
     private static final String TAG_TARGET = "TargetPos";
     private static final String TAG_DISTANCE = "Distance";
     private static final String TAG_ENERGY = "EnergyStored";
+    private static final String TAG_BUFFER_VOLTAGE = "BufferVoltage";
 
     private final ConnectorEnergyContainer energyContainer = new ConnectorEnergyContainer(this);
     private LazyOptional<IEnergyContainer> energyCapability = LazyOptional.empty();
@@ -197,7 +198,8 @@ public class ConnectorBlockEntity extends BlockEntity {
 
     private void pushToLocalNetwork() {
         WireTier tier = getTier();
-        long voltage = tier.voltage();
+        // never re-emit at a higher voltage than the buffer received (see bufferVoltage)
+        long voltage = energyContainer.getEffectiveOutputVoltage();
         int maxAmps = tier.maxAmperage();
         if (voltage <= 0 || maxAmps <= 0) {
             return;
@@ -248,7 +250,7 @@ public class ConnectorBlockEntity extends BlockEntity {
             return;
         }
         WireTier tier = getTier();
-        long voltage = tier.voltage();
+        long voltage = energyContainer.getEffectiveOutputVoltage();
         int maxAmps = tier.maxAmperage();
         if (voltage <= 0 || maxAmps <= 0) {
             return;
@@ -258,8 +260,8 @@ public class ConnectorBlockEntity extends BlockEntity {
             return;
         }
 
-        List<WireNetworkSavedData.Delivery> deliveries = WireNetworkSavedData.get(serverLevel).route(worldPosition,
-                voltage, maxAmps);
+        List<WireNetworkSavedData.Delivery> deliveries = WireNetworkSavedData.get(serverLevel)
+                .route(serverLevel, worldPosition, voltage, maxAmps);
         for (WireNetworkSavedData.Delivery delivery : deliveries) {
             if (budget <= 0) {
                 break;
@@ -471,6 +473,7 @@ public class ConnectorBlockEntity extends BlockEntity {
     public void load(CompoundTag tag) {
         super.load(tag);
         this.energyContainer.setEnergyStored(tag.getLong(TAG_ENERGY));
+        this.energyContainer.setBufferVoltage(tag.contains(TAG_BUFFER_VOLTAGE) ? tag.getLong(TAG_BUFFER_VOLTAGE) : 0);
         this.energyContainer.clearWireOriginEnergy();
         if (tag.contains(TAG_TARGET)) {
             BlockPos loaded = NbtUtils.readBlockPos(tag.getCompound(TAG_TARGET));
@@ -485,6 +488,7 @@ public class ConnectorBlockEntity extends BlockEntity {
     protected void saveAdditional(CompoundTag tag) {
         super.saveAdditional(tag);
         tag.putLong(TAG_ENERGY, energyContainer.getEnergyStored());
+        tag.putLong(TAG_BUFFER_VOLTAGE, energyContainer.getBufferVoltage());
         if (targetPos != null) {
             tag.put(TAG_TARGET, NbtUtils.writeBlockPos(targetPos));
             tag.putDouble(TAG_DISTANCE, distance);

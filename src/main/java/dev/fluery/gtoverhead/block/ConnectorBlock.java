@@ -27,8 +27,8 @@ public class ConnectorBlock extends BaseConnectorBlock {
     }
 
     @Override
-    protected double[][] shapeBoxes() {
-        return PoleShapes.TIER_BOX_SETS[tier.index];
+    protected double shapeHeight() {
+        return tier.tipHeight();
     }
 
     @Nullable
