@@ -103,6 +103,12 @@ public class WireSpoolItem extends Item {
         if (player == null) {
             return InteractionResult.PASS;
         }
+        if (player.isShiftKeyDown() && getLinkPos(stack) != null) {
+            // shift + right click anywhere: cancel the anchor
+            setLinkPos(stack, null);
+            message(player, "message.gtoverhead.spool_cancelled");
+            return InteractionResult.SUCCESS;
+        }
         if (!tierAcceptable(this, blockEntity)) {
             message(player, "message.gtoverhead.tier_mismatch");
             return InteractionResult.FAIL;
@@ -185,6 +191,19 @@ public class WireSpoolItem extends Item {
 
     private static String formatPos(BlockPos pos) {
         return pos.getX() + ", " + pos.getY() + ", " + pos.getZ();
+    }
+
+    @Override
+    public net.minecraft.world.InteractionResultHolder<ItemStack> use(Level level, Player player,
+                                                                      net.minecraft.world.InteractionHand hand) {
+        // shift + right click into the air: cancel the anchor
+        ItemStack stack = player.getItemInHand(hand);
+        if (!level.isClientSide && player.isShiftKeyDown() && getLinkPos(stack) != null) {
+            setLinkPos(stack, null);
+            message(player, "message.gtoverhead.spool_cancelled");
+            return net.minecraft.world.InteractionResultHolder.consume(stack);
+        }
+        return super.use(level, player, hand);
     }
 
     @Override

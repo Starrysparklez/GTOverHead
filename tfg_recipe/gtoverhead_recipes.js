@@ -1,11 +1,3 @@
-ServerEvents.tags('item', event => {
-    event.add('kubejs:rubber_plates', [
-        'gtceu:rubber_plate',
-        'gtceu:silicone_rubber_plate',
-        'gtceu:styrene_butadiene_rubber_plate'
-    ])
-});
-
 ServerEvents.recipes((event) => {
     /*
         SPOOLS
@@ -29,7 +21,7 @@ ServerEvents.recipes((event) => {
         });
     });
 
-    event.shaped('gtoverhead:empty_spool', [
+    event.shaped('4x gtoverhead:empty_spool', [
         ' PL',
         'PLP',
         'LP ',
@@ -39,66 +31,104 @@ ServerEvents.recipes((event) => {
     });
 
     /*
+        TOOLS
+    */
+
+    event.shaped('gtoverhead:voltmeter', [
+        'WGW',
+        'CSC',
+        'PFP',
+    ], {
+        W: 'gtceu:copper_single_wire',
+        S: 'gtceu:fine_copper_wire',
+        P: 'gtceu:polyethylene_plate',
+        F: 'gtceu:copper_foil',
+        C: '#gtceu:circuits/lv',
+        G: 'gtceu:glass_plate'
+    });
+
+    // Zipline: GTOverHead (fork of Zipline by goldenxelenium)
+    event.shaped('zipline:zipline', [
+        'C C',
+        'WPS',
+        '   ',
+    ], {
+        C: "gtceu:mv_voltage_coil",
+        P: "gtceu:lv_power_unit",
+        W: '#forge:tools/wrenches',
+        S: "#forge:tools/screwdrivers"
+    });
+
+    /*
         CONNECTORS
     */
 
-    event.shaped('gtoverhead:structural_connector', [
+    event.shaped('4x gtoverhead:structural_connector', [
         ' S ',
         'GGG',
-        'RRR',
+        'PPP',
     ], {
         S: 'gtceu:long_steel_rod',
         G: 'firmalife:reinforced_glass',
-        R: '#kubejs:rubber_plates',
+        P: 'gtceu:steel_plate',
     });
 
-    event.shaped('gtoverhead:lv_connector', [
+    event.shaped('8x gtoverhead:insulator_garland', [
+        ' S ',
+        'GGG',
+        ' S ',
+    ], {
+        S: 'gtceu:long_steel_rod',
+        G: 'firmalife:reinforced_glass'
+    });
+
+    event.shaped('4x gtoverhead:lv_connector', [
         'R',
         'B',
         'P',
     ], {
         R: 'gtceu:tin_rod',
         B: 'tfc:ceramic/fire_brick',
-        P: '#kubejs:rubber_plates',
+        P: 'gtceu:steel_plate',
     });
 
-    event.shaped('gtoverhead:mv_connector', [
+    event.shaped('4x gtoverhead:mv_connector', [
         'R',
         'B',
         'P',
     ], {
         R: 'gtceu:copper_rod',
         B: 'tfc:ceramic/fire_brick',
-        P: '#kubejs:rubber_plates',
+        P: 'gtceu:steel_plate',
     });
 
-    event.shaped('gtoverhead:hv_connector', [
+    event.shaped('4x gtoverhead:hv_connector', [
         ' R ',
         'BBB',
         'PPP',
     ], {
         R: 'gtceu:long_steel_rod',
         B: 'tfc:ceramic/fire_brick',
-        P: '#kubejs:rubber_plates',
+        P: 'gtceu:steel_plate',
     });
 
-    event.shaped('gtoverhead:ev_connector', [
+    event.shaped('4x gtoverhead:ev_connector', [
         ' R ',
         'GGG',
         'PPP',
     ], {
         R: 'gtceu:long_aluminium_rod',
         G: 'firmalife:reinforced_glass',
-        P: '#kubejs:rubber_plates',
+        P: 'gtceu:steel_plate',
     });
 
-    event.shaped('gtoverhead:iv_connector', [
+    event.shaped('4x gtoverhead:iv_connector', [
         ' R ',
         'GGG',
         'PPP',
     ], {
         R: 'gtceu:long_platinum_rod',
         G: 'gtceu:borosilicate_glass_ingot',
-        P: '#kubejs:rubber_plates',
+        P: 'gtceu:steel_plate',
     });
 });

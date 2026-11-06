@@ -95,6 +95,7 @@ public final class GTOverheadRegistries {
     private static Supplier<ConnectorBlock> registerConnector(GTRegistrate registrate, WireTier tier) {
         var block = registrate.block(tier.shortName + "_connector", props -> new ConnectorBlock(props, tier))
                 .initialProperties(() -> Blocks.IRON_BLOCK)
+                .properties(props -> props.strength(0.75F, 6.0F))
                 .simpleItem()
                 .register();
         return () -> block.get();
@@ -103,6 +104,7 @@ public final class GTOverheadRegistries {
     private static Supplier<RelayConnectorBlock> registerRelay(GTRegistrate registrate) {
         var block = registrate.block("structural_connector", RelayConnectorBlock::new)
                 .initialProperties(() -> Blocks.IRON_BLOCK)
+                .properties(props -> props.strength(0.75F, 6.0F))
                 .simpleItem()
                 .register();
         return () -> block.get();
@@ -122,6 +124,7 @@ public final class GTOverheadRegistries {
     private static void registerGarland(GTRegistrate registrate) {
         var block = registrate.block("insulator_garland", GarlandBlock::new)
                 .initialProperties(() -> Blocks.IRON_BLOCK)
+                .properties(props -> props.strength(0.75F, 6.0F))
                 .simpleItem()
                 .register();
         GARLAND = () -> block.get();

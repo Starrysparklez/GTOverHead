@@ -1,0 +1,12 @@
+{
+  "replace": false,
+  "values": [
+    "gtoverhead:lv_connector",
+    "gtoverhead:mv_connector",
+    "gtoverhead:hv_connector",
+    "gtoverhead:ev_connector",
+    "gtoverhead:iv_connector",
+    "gtoverhead:structural_connector",
+    "gtoverhead:insulator_garland"
+  ]
+}
